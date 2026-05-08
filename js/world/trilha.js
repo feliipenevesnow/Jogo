@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { WORLD_CONFIG, getHillEffect, getNoise } from './config.js';
 
+import { createDetailedStaircase } from './staircase.js';
+
 /**
  * Cria a trilha de concreto centralizada e plana.
  */
@@ -27,19 +29,19 @@ export function createTrail() {
         { w: pathW, d: pathRectD + pathW, x: pathXOffset + pathRectW/2, z: 0 }
     ];
 
-    // 2. Conexões Simétricas novamente (já que está no centro)
+    // 2. Conexões Simétricas
     const connParts = [
         // OESTE
         { w: (width/2 - pathRectW/2), d: pathW, x: -width/2 + (width/2 - pathRectW/2)/2, z: 0 },
         
-        // LESTE
-        { w: (width/2 - pathRectW/2), d: pathW, x: width/2 - (width/2 - pathRectW/2)/2, z: 0 },
+        // LESTE (Removido daqui para ser substituído pela escada abaixo)
+        // { w: (width/2 - pathRectW/2), d: pathW, x: width/2 - (width/2 - pathRectW/2)/2, z: 0 },
         
-        // NORTE: Duas saídas para quebrar a simetria chata
+        // NORTE
         { w: pathW, d: (depth/2 - pathRectD/2), x: 0, z: -(pathRectD/2 + (depth/2 - pathRectD/2)/2) },
         { w: pathW, d: (depth/2 - pathRectD/2), x: pathRectW/2 - 5, z: -(pathRectD/2 + (depth/2 - pathRectD/2)/2) },
         
-        // SUL: Uma saída deslocada
+        // SUL
         { w: pathW, d: (depth/2 - pathRectD/2), x: -pathRectW/2 + 5, z: (pathRectD/2 + (depth/2 - pathRectD/2)/2) }
     ];
 
@@ -66,6 +68,11 @@ export function createTrail() {
         mesh.receiveShadow = true;
         group.add(mesh);
     });
+
+    // 3. Adicionar a Escadaria Detalhada no lugar da rampa LESTE
+    const startX = pathRectW / 2;
+    const endX = width / 2;
+    group.add(createDetailedStaircase(startX, endX, 0, pathW));
 
     return group;
 }

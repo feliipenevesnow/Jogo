@@ -8,8 +8,30 @@
 </head>
 <body>
     <div id="ui-container">
-        <h1>3D Nature Explorer</h1>
-        <p>Use o mouse para rotacionar e zoom</p>
+        <p id="dialogue-text"></p>
+        <button id="dialogue-btn" style="display: none;">Continuar</button>
+    </div>
+
+
+    <!-- Instagram Modal -->
+    <div id="insta-modal" style="display: flex; flex-direction: column; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; font-family: sans-serif;">
+        <div style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); padding: 3px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="background: #1a1a1a; padding: 30px; border-radius: 12px; text-align: center; color: white; max-width: 90vw;">
+                <h2 style="margin-top: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">Instagram</h2>
+                <p id="insta-msg" style="margin-bottom: 20px; font-size: 16px;">Digite seu usuário do Instagram para jogar:</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="insta-input" placeholder="@usuario" style="padding: 12px; border-radius: 8px; border: 1px solid #333; outline: none; font-size: 16px; background: #2a2a2a; color: white; flex-grow: 1;">
+                    <button id="insta-btn" style="padding: 12px 25px; border: none; border-radius: 8px; background: #dc2743; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s;">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Vídeo Final -->
+    <video id="end-video" playsinline style="display: none; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: 9999; background: black;"></video>
+
+    <!-- UI Batimento Cardíaco -->
+    <div id="heartbeat-container" style="display: none;">
+        <div id="heart">❤️</div>
     </div>
     
     <!-- Import Map for Three.js -->
@@ -17,7 +39,8 @@
         {
             "imports": {
                 "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+                "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
             }
         }
     </script>

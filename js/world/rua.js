@@ -13,11 +13,12 @@ export function createStreet(innerWidth, innerDepth, height, texture) {
         roughness: 0.6,
     });
 
+    const gridLength = 400; // Ruas agora se estendem para longe
     const parts = [
-        { w: streetW, h: height - 0.2, d: innerWidth, x: -(innerDepth + streetW) / 2, z: 0 },
-        { w: streetW, h: height - 0.2, d: innerWidth, x: (innerDepth + streetW) / 2, z: 0 },
-        { w: innerDepth + streetW * 2, h: height - 0.2, d: streetW, x: 0, z: -(innerDepth + streetW) / 2 },
-        { w: innerDepth + streetW * 2, h: height - 0.2, d: streetW, x: 0, z: (innerDepth + streetW) / 2 }
+        { w: streetW, h: height - 0.2, d: gridLength, x: -(innerWidth + streetW) / 2, z: 0 },
+        { w: streetW, h: height - 0.2, d: gridLength, x: (innerWidth + streetW) / 2, z: 0 },
+        { w: gridLength, h: height - 0.2, d: streetW, x: 0, z: -(innerDepth + streetW) / 2 },
+        { w: gridLength, h: height - 0.2, d: streetW, x: 0, z: (innerDepth + streetW) / 2 }
     ];
 
     parts.forEach(p => {

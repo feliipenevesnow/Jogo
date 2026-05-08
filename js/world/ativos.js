@@ -8,7 +8,27 @@ export const treeColliders = [];
 const treeInstances = []; 
 
 /**
- * Adiciona árvores com posicionamento preciso no terreno irregular.
+ * LISTA FIXA DE POSIÇÕES - TOTALMENTE FORA DO RETÂNGULO CENTRAL
+ * O retângulo central vai de X[-15, 15] e Z[-45, 45] aproximadamente.
+ */
+const FIXED_TREE_POSITIONS = [
+    // Cantos Externos (Noroeste)
+    { x: -45, z: -45 }, { x: -40, z: -50 }, { x: -50, z: -40 }, { x: -35, z: -55 },
+    // Cantos Externos (Nordeste)
+    { x: 45, z: -45 },  { x: 40, z: -50 },  { x: 50, z: -40 },  { x: 35, z: -55 },
+    // Cantos Externos (Sudoeste)
+    { x: -45, z: 45 },  { x: -40, z: 50 },  { x: 50, z: 40 },   { x: -35, z: 55 },
+    // Cantos Externos (Sudeste)
+    { x: 45, z: 45 },   { x: 40, z: 50 },   { x: 55, z: 40 },   { x: 35, z: 55 },
+    // Laterais da Praça (Longe do centro)
+    { x: -50, z: 0 },   { x: -55, z: 15 },  { x: -55, z: -15 },
+    { x: 50, z: 8 },    { x: 55, z: 15 },   { x: 55, z: -15 },
+    // Ao longo das calçadas (Norte/Sul)
+    { x: 20, z: -55 },  { x: -20, z: -55 }, { x: 20, z: 55 },   { x: -20, z: 55 }
+];
+
+/**
+ * Adiciona árvores em posições fixas, garantindo o centro livre.
  */
 export function addAssets(group) {
     const manager = new THREE.LoadingManager();
@@ -77,38 +97,33 @@ function normalizeModel(obj, targetHeight) {
 }
 
 function distributeTrees(group, treeTypes) {
-    const totalTrees = 21; 
     const { width, depth } = WORLD_CONFIG;
 
-    for (let i = 0; i < totalTrees; i++) {
+    FIXED_TREE_POSITIONS.forEach((pos, i) => {
         const typeIndex = i % treeTypes.length;
         const container = new THREE.Group();
         const treeInstance = treeTypes[typeIndex].clone();
         
-        const s = 0.9 + Math.random() * 0.4;
+        const s = 0.9 + (i % 5) * 0.1; 
         treeInstance.scale.multiplyScalar(s);
         
         container.add(treeInstance);
-        container.rotation.y = Math.random() * Math.PI * 2;
+        container.rotation.y = (i * 1.5); 
         
-        const x = (Math.random() - 0.5) * (width - 40);
-        const z = (Math.random() - 0.5) * (depth - 40);
-        
-        // CORREÇÃO: Incluir o Noise para a árvore não flutuar
-        const hill = getHillEffect(x);
-        const noise = getNoise(x, z, width, depth);
+        const hill = getHillEffect(pos.x);
+        const noise = getNoise(pos.x, pos.z, width, depth);
         const y = WORLD_CONFIG.baseHeight + hill + noise;
         
-        container.position.set(x, y, z);
+        container.position.set(pos.x, y, pos.z);
         group.add(container);
 
         treeInstances.push(container);
-        treeColliders.push({ x, z, radius: 2.5 });
-    }
+        treeColliders.push({ x: pos.x, z: pos.z, radius: 2.5 });
+    });
 }
 
 export function updateAssetsOptimization(playerPosition) {
-    const maxDist = 70; 
+    const maxDist = 75; 
     for (const tree of treeInstances) {
         const dist = tree.position.distanceTo(playerPosition);
         tree.visible = (dist < maxDist);

@@ -7,7 +7,7 @@ export const WORLD_CONFIG = {
     depth: 120,      
     baseHeight: 5,
     sw: 6,           
-    streetW: 15,     
+    streetW: 30,     
     curbH: 0.2,     
     streetY: -0.1,  
     hillIntensity: 18,

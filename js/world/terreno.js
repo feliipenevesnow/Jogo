@@ -3,8 +3,10 @@ import { createSidewalk } from './calcada.js';
 import { createStreet } from './rua.js';
 import { createStairs } from './escada.js';
 import { createTrail } from './trilha.js';
-import { createShelter } from './abrigo.js';
+import { createShelter, createGLBBench } from './abrigo.js';
+import { createBusStop } from './ponto_onibus.js';
 import { addAssets } from './ativos.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { WORLD_CONFIG, getHillEffect, getNoise } from './config.js';
 
 /**
@@ -70,12 +72,28 @@ export function createTerrain() {
     const trails = createTrail();
     terrainGroup.add(trails);
 
-    // Adicionar Abrigos (Pergolas) nas esquinas
-    const shelter1 = createShelter(-45, -45); // Canto Noroeste
-    terrainGroup.add(shelter1);
+    // Adicionar os Bancos/Abrigos
+    const gltfLoader = new GLTFLoader();
+    gltfLoader.load('assets/models/bench/banco.glb', (gltf) => {
+        const benchModel = gltf.scene;
+        
+        // Banco 1 (Removido a pedido do usuário)
+        // terrainGroup.add(createGLBBench(-6.54, 28.93, benchModel));
+        
+        // Banco 2: O Banco clonado posicionado perfeitamente pelo usuário
+        const originalBenchRotation = Math.atan2(-6.54, 28.93) + Math.PI + (Math.PI / (-2.5));
+        terrainGroup.add(createGLBBench(-6.50, 19.98, benchModel, {
+            customY: 5.07,
+            customRotation: originalBenchRotation
+        }));
+    });
 
-    const shelter2 = createShelter(-45, 45);  // Canto Sudoeste
-    terrainGroup.add(shelter2);
+    // Banco 2: Abrigo Procedural (O "antigo" abrigo.js)
+    terrainGroup.add(createShelter(-20.95, -23.56));
+
+    // Ponto de Ônibus
+    terrainGroup.add(createBusStop(-38.64, -62.35));
+
 
     // Adicionar Ativos (Árvores 3D)
     addAssets(terrainGroup);
