@@ -411,7 +411,9 @@ function updateEvents() {
                         heartbeatContainer.classList.add('heart-center');
                         heartbeatContainer.style.display = 'block';
                         audioCtx.resume();
-                        nextBeatTime = audioCtx.currentTime;
+                        // Força o primeiro batimento AQUI dentro do evento de clique para destravar no iOS/Mobile
+                        playHeartbeat(audioCtx.currentTime);
+                        nextBeatTime = audioCtx.currentTime + beatInterval;
                         
                         // Faz o coração deslizar para o canto após aparecer
                         setTimeout(() => {
