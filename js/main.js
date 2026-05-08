@@ -313,6 +313,16 @@ let heartbeatActive = false; // Flag de segurança para garantir que o som pare
 
 const startBtn = document.getElementById('start-btn');
 startBtn.onclick = () => {
+    // Hack: Força o vídeo a tocar um frame invisível e pausar para destravar a engine de áudio de mídia no iOS
+    const video = document.getElementById('end-video');
+    if (video) {
+        video.muted = false;
+        video.play().then(() => {
+            video.pause();
+            // Apenas para garantir, não mexemos na tela do vídeo
+        }).catch(() => {});
+    }
+
     // Cria e desbloqueia o AudioContext no clique exato do usuário
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     audioCtx = new AudioContext();

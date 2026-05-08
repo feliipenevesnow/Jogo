@@ -76,7 +76,7 @@ p {
 /* UI Batimento Cardíaco */
 #heartbeat-container {
     position: absolute;
-    bottom: 30px;
+    top: 30px;
     left: 30px;
     font-size: 50px;
     filter: drop-shadow(0 0 15px red);
@@ -87,9 +87,9 @@ p {
 }
 
 .heart-center {
-    bottom: 50% !important;
+    top: 50% !important;
     left: 50% !important;
-    transform: translate(-50%, 50%) scale(2);
+    transform: translate(-50%, -50%) scale(2);
 }
 
 @keyframes beat {
