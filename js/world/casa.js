@@ -54,6 +54,10 @@ export function createHouse(scene, x, y, z) {
         });
         
         scene.add(obj);
+        
+        window.walkableMeshes = window.walkableMeshes || [];
+        window.walkableMeshes.push(obj);
+        
         console.log("Modelo Casa carregado e posicionado em:", x, z);
     }, 
     (xhr) => {

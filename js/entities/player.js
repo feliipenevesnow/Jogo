@@ -55,9 +55,9 @@ export class Player {
                 }
             }
 
-            // 2. Colisão com Bordas
-            const limitX = WORLD_CONFIG.width / 2 + WORLD_CONFIG.sw + WORLD_CONFIG.streetW - 5;
-            const limitZ = WORLD_CONFIG.depth / 2 + WORLD_CONFIG.sw + WORLD_CONFIG.streetW - 5;
+            // 2. Colisão com Bordas (expandida para caber a casa e os orbes na Coord 4)
+            const limitX = 150;
+            const limitZ = 150;
             if (Math.abs(this.position.x) > limitX || Math.abs(this.position.z) > limitZ) {
                 this.position.copy(oldPosition);
             }
@@ -65,7 +65,7 @@ export class Player {
 
         this.mesh.rotation.y = this.rotation;
 
-        // 3. Altura do Terreno (Garante que a câmera saia do chão logo de início)
+        // 4. Altura do Terreno (Garante que a câmera acompanhe rampas e objetos)
         const groundHeight = this.getTerrainHeight(this.position.x, this.position.z);
         // Altura aumentada a pedido do usuário para 3.5
         this.position.y = groundHeight + 3.5;
@@ -92,6 +92,17 @@ export class Player {
     }
 
     getTerrainHeight(x, z) {
+        // Usa raycaster para testar os meshes andáveis (ex: casa)
+        let rayHeight = null;
+        if (window.walkableMeshes && window.walkableMeshes.length > 0) {
+            const raycaster = new THREE.Raycaster();
+            raycaster.set(new THREE.Vector3(x, 1000, z), new THREE.Vector3(0, -1, 0));
+            const intersects = raycaster.intersectObjects(window.walkableMeshes, true);
+            if (intersects.length > 0) {
+                rayHeight = intersects[0].point.y;
+            }
+        }
+
         const { width, sw, streetW, baseHeight, curbH, streetY } = WORLD_CONFIG;
         const hill = getHillEffect(x);
         const absX = Math.abs(x);
@@ -102,30 +113,23 @@ export class Player {
         const streetLimit = innerSwLimit + streetW;
         const outerSwLimit = streetLimit + sw;
 
+        let terrainHeight = baseHeight + streetY + hill; // Fundo
+
         // 1. Área do Parque (Grama)
         if (absX < parkLimit && absZ < parkLimit) {
-            return baseHeight + getNoise(x, z, width, width) + hill;
+            terrainHeight = baseHeight + getNoise(x, z, width, width) + hill;
+        } 
+        // 2. Calçadas e Ruas
+        else if ((absX >= innerSwLimit && absX < streetLimit) || (absZ >= innerSwLimit && absZ < streetLimit)) {
+            terrainHeight = baseHeight + streetY + hill; // Rua
+        } else if (absX < outerSwLimit && absZ < outerSwLimit) {
+            terrainHeight = baseHeight + curbH + hill; // Calçada (Inner ou Outer/Esquina)
         }
 
-        // 2. Calçadas (Inner ou Outer)
-        const isOnInnerSW = (absX < innerSwLimit && absZ < innerSwLimit);
-        const isOnOuterSW = (absX < outerSwLimit && absZ < outerSwLimit);
-        const isNotOnStreet = !((absX >= innerSwLimit && absX < streetLimit) || (absZ >= innerSwLimit && absZ < streetLimit));
-
-        if (isOnOuterSW && !isNotOnStreet) {
-            // Se estiver na zona da rua mas não for rua, é calçada externa ou esquina
-            return baseHeight + streetY + hill; // Placeholder simplificado
+        if (rayHeight !== null && rayHeight > terrainHeight) {
+            return rayHeight;
         }
 
-        // Refinando a lógica de detecção de solo para o grid #
-        if ((absX >= innerSwLimit && absX < streetLimit) || (absZ >= innerSwLimit && absZ < streetLimit)) {
-            return baseHeight + streetY + hill; // Rua
-        }
-
-        if (absX < outerSwLimit && absZ < outerSwLimit) {
-            return baseHeight + curbH + hill; // Calçada (Inner ou Outer/Esquina)
-        }
-
-        return baseHeight + streetY + hill; // Fundo
+        return terrainHeight;
     }
 }

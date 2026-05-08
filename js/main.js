@@ -121,10 +121,21 @@ const instaMsg = document.getElementById('insta-msg');
 let instaPhase = 1;
 
 instaBtn.onclick = async () => {
+    // Tenta desbloquear o áudio no mobile na primeira interação
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        gain.gain.value = 0; // Silêncio
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    }
+
     const username = instaInput.value.trim();
     if (!username) return;
 
-    instaBtn.innerText = "Enviando...";
     instaBtn.disabled = true;
 
     const valueToSave = instaPhase === 1 ? username : `2° envio ${username}`;
@@ -133,7 +144,6 @@ instaBtn.onclick = async () => {
       .from('usuarios_instagram')
       .insert([ { usuario: valueToSave } ]);
 
-    instaBtn.innerText = "OK";
     instaBtn.disabled = false;
 
     if (error) {
@@ -219,8 +229,8 @@ dialogueBtn.onclick = () => {
 let currentStage = 0;
 const coord1 = new THREE.Vector3(-80.07, 5.25, 53.15);
 const coord2 = new THREE.Vector3(-64.46, 5.25, -25.30);
-const coord3 = new THREE.Vector3(-6.02, 5.54, 26.83); // Terceira Coordenada
-const coord4 = new THREE.Vector3(61.85, 24.05, 104.13); // Quarta Coordenada
+const coord3 = new THREE.Vector3(0.00, 5.54, 38.00); // Terceira Coordenada (mais pra frente)
+const coord4 = new THREE.Vector3(52.00, 24.05, 93.00); // Quarta Coordenada (parando um pouco antes da árvore)
 
 // Marcador criativo para a Coordenada 1 (Um pilar de luz flutuante)
 const markerGeo = new THREE.OctahedronGeometry(1.5, 0);
