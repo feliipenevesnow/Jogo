@@ -121,18 +121,6 @@ const instaMsg = document.getElementById('insta-msg');
 let instaPhase = 1;
 
 instaBtn.onclick = async () => {
-    // Tenta desbloquear o áudio no mobile na primeira interação
-    if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        gain.gain.value = 0; // Silêncio
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.1);
-    }
-
     const username = instaInput.value.trim();
     if (!username) return;
 
@@ -154,7 +142,7 @@ instaBtn.onclick = async () => {
     instaInput.value = '';
 
     if (instaPhase === 1) {
-        setTimeout(typeWriter, 500);
+        document.getElementById('start-modal').style.display = 'flex';
     } else {
         // Segunda fase (após clicar no botão "Tocar nos Orbes")
         uiContainer.style.display = 'block';
@@ -318,14 +306,45 @@ const heartElement = document.getElementById('heart');
 const heartbeatContainer = document.getElementById('heartbeat-container');
 
 // Configuração do Áudio do Batimento (Sintetizado no navegador para não precisar de mp3)
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-const audioCtx = new AudioContext();
+let audioCtx = null;
 let nextBeatTime = 0;
 let beatInterval = 1.5; // Segundos
 let heartbeatActive = false; // Flag de segurança para garantir que o som pare
 
+const startBtn = document.getElementById('start-btn');
+startBtn.onclick = () => {
+    // Cria e desbloqueia o AudioContext no clique exato do usuário
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AudioContext();
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    gain.gain.value = 0;
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+
+    // Inicia o coração logo de início
+    heartbeatActive = true;
+    heartbeatContainer.classList.add('heart-center');
+    heartbeatContainer.style.display = 'block';
+    
+    playHeartbeat(audioCtx.currentTime);
+    nextBeatTime = audioCtx.currentTime + beatInterval;
+
+    setTimeout(() => {
+        heartbeatContainer.classList.remove('heart-center');
+    }, 2000);
+
+    document.getElementById('start-modal').style.display = 'none';
+    setTimeout(typeWriter, 500);
+};
+
 function playHeartbeat(time) {
-    if (!heartbeatActive) return; // Garante que não toca depois que passar de fase
+    if (!heartbeatActive || !audioCtx) return; // Garante que não toca depois que passar de fase
     if (audioCtx.state === 'suspended') audioCtx.resume();
     
     // Tuntum 1
@@ -368,6 +387,14 @@ function playHeartbeat(time) {
 function updateEvents() {
     if (!player) return;
     
+    // Batimento Cardíaco Contínuo (roda em todas as fases)
+    if (heartbeatActive && audioCtx) {
+        if (audioCtx.currentTime > nextBeatTime) {
+            playHeartbeat(nextBeatTime);
+            nextBeatTime += beatInterval;
+        }
+    }
+    
     const pPos = player.position;
 
     if (currentStage === 0) {
@@ -406,20 +433,6 @@ function updateEvents() {
                         auraParticles.visible = true;
                         auraLight.visible = true;
                         
-                        // Mostra a UI do coração no centro e liga o som
-                        heartbeatActive = true;
-                        heartbeatContainer.classList.add('heart-center');
-                        heartbeatContainer.style.display = 'block';
-                        audioCtx.resume();
-                        // Força o primeiro batimento AQUI dentro do evento de clique para destravar no iOS/Mobile
-                        playHeartbeat(audioCtx.currentTime);
-                        nextBeatTime = audioCtx.currentTime + beatInterval;
-                        
-                        // Faz o coração deslizar para o canto após aparecer
-                        setTimeout(() => {
-                            heartbeatContainer.classList.remove('heart-center');
-                        }, 2000);
-                        
                         currentStage = 2;
                     };
                 }
@@ -445,7 +458,7 @@ function updateEvents() {
         beatInterval = 0.3 + (factor * 1.2); 
         heartElement.style.animationDuration = beatInterval + 's';
         
-        if (audioCtx.currentTime > nextBeatTime) {
+        if (audioCtx && audioCtx.currentTime > nextBeatTime) {
             playHeartbeat(nextBeatTime);
             nextBeatTime += beatInterval;
         }
@@ -486,7 +499,7 @@ function updateEvents() {
         // O coração continua batendo rápido durante todo o diálogo e transição
         beatInterval = 0.3;
         heartElement.style.animationDuration = '0.3s';
-        if (audioCtx.currentTime > nextBeatTime) {
+        if (audioCtx && audioCtx.currentTime > nextBeatTime) {
             playHeartbeat(nextBeatTime);
             nextBeatTime += beatInterval;
         }
@@ -726,7 +739,7 @@ function updateEvents() {
         // O coração fica insano (Ainda mais acelerado!)
         beatInterval = 0.15;
         heartElement.style.animationDuration = '0.15s';
-        if (audioCtx.currentTime > nextBeatTime) {
+        if (audioCtx && audioCtx.currentTime > nextBeatTime) {
             playHeartbeat(nextBeatTime);
             nextBeatTime += beatInterval;
         }

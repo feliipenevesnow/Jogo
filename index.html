@@ -26,6 +26,17 @@
             </div>
         </div>
     </div>
+
+    <!-- Start Game Modal para destravar o Áudio -->
+    <div id="start-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 10005; align-items: center; justify-content: center; font-family: sans-serif;">
+        <div style="text-align: center; color: white;">
+            <p style="margin-bottom: 20px; font-size: 18px;">O jogo contém áudio interativo importante.</p>
+            <button id="start-btn" style="padding: 15px 30px; font-size: 20px; border: 2px solid white; border-radius: 10px; background: rgba(255,255,255,0.1); color: white; cursor: pointer; backdrop-filter: blur(5px);">
+                🎵 Iniciar Experiência
+            </button>
+        </div>
+    </div>
+
     <!-- Vídeo Final -->
     <video id="end-video" playsinline style="display: none; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: 9999; background: black;"></video>
 
